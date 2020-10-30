@@ -16,6 +16,9 @@ namespace cAlgo.Robots
         [Parameter("Quantity (Lots)", Group = "Volume", DefaultValue = 1, MinValue = 0.01, Step = 0.01)]
         public double Quantity { get; set; }
 
+        [Parameter("Max Concurrent Positions", Group = "TPSL", DefaultValue = 2, MinValue = 1, Step = 1)]
+        public int MaxConcurrentPositions { get; set; }
+
         [Parameter("SL Pips", Group = "TPSL", DefaultValue = 2, MinValue = 0.1, Step = 0.1)]
         public double SlPips { get; set; }
 
@@ -45,13 +48,12 @@ namespace cAlgo.Robots
             var position = Positions.Find(name, SymbolName, tradeType);
             var volumeInUnits = Symbol.QuantityToVolumeInUnits(Quantity);
 
-            //double tp = tradeType == TradeType.Sell ? -TpPips : TpPips;
-            //double sl = tradeType == TradeType.Sell ? SlPips : -SlPips;
-
-            if (position == null)
+            if (position == null && Positions.Count < MaxConcurrentPositions)
             {
                 Print("Going to execute order to {0}", tradeType);
-                ExecuteMarketOrder(tradeType, SymbolName, volumeInUnits, name, TpPips, SlPips);
+                Print("TP: {0}", TpPips);
+                Print("SL: {0}", SlPips);
+                ExecuteMarketOrder(tradeType, SymbolName, volumeInUnits, name, SlPips, TpPips);
             }
             else
             {
